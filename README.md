@@ -1,4 +1,4 @@
-# :movie_camera: Movie Rental (Java/Spring)
+# :postbox: ProTasker (Java/Spring)
 
 Welcome to the ProTasker, Java/Spring based application to manage tasks.
 
