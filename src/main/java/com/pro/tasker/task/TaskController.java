@@ -1,14 +1,15 @@
 package com.pro.tasker.task;
 
+import com.pro.tasker.messaging.config.RabbitMQConfig;
 import com.pro.tasker.task.entity.Task;
 import com.pro.tasker.task.service.TaskService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,31 +23,46 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
-    // Create a new task
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
     @PostMapping("/create")
     public Task createTask(@RequestBody Task task) {
-        return taskService.createTask(task);
+        Task createdTask = taskService.createTask(task);
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE_NAME,
+                RabbitMQConfig.ROUTING_KEY,
+                "New task created: " + createdTask.getId()
+        );
+
+        return createdTask;
     }
 
-    // Get all tasks
     @GetMapping("/getAll")
     public List<Task> getAllTasks() {
         return taskService.getAllTasks();
     }
 
-    // Get task by ID
     @GetMapping("/get/{taskId}")
     public Task getTaskById(@PathVariable Long taskId) {
         return taskService.getTaskById(taskId);
     }
 
-    // Update task by ID
     @PatchMapping("/update/{taskId}")
     public Task updateTask(@PathVariable Long taskId, @RequestBody Task updatedTask) {
-        return taskService.updateTask(taskId, updatedTask);
+        Task updatedTaskResult = taskService.updateTask(taskId, updatedTask);
+
+        // Send message to RabbitMQ when a task is updated
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE_NAME,
+                RabbitMQConfig.ROUTING_KEY,
+                "Task updated: " + updatedTaskResult.getId()
+        );
+
+        return updatedTaskResult;
     }
 
-    // Delete task by ID
     @DeleteMapping("/delete/{taskId}")
     public String deleteTask(@PathVariable Long taskId) {
         taskService.deleteTask(taskId);

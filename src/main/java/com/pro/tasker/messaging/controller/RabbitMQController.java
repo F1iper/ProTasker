@@ -1,5 +1,6 @@
-package com.pro.tasker.messaging;
+package com.pro.tasker.messaging.controller;
 
+import com.pro.tasker.messaging.MessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
