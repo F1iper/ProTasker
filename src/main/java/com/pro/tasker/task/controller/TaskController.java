@@ -1,5 +1,7 @@
-package com.pro.tasker.task;
+package com.pro.tasker.task.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pro.tasker.messaging.config.RabbitMQConfig;
 import com.pro.tasker.task.entity.Task;
 import com.pro.tasker.task.service.TaskService;
@@ -30,12 +32,19 @@ public class TaskController {
     public Task createTask(@RequestBody Task task) {
         Task createdTask = taskService.createTask(task);
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        String taskJson;
+        try {
+            taskJson = objectMapper.writeValueAsString(createdTask);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error converting Task to JSON", e);
+        }
+
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE_NAME,
                 RabbitMQConfig.ROUTING_KEY,
-                "New task created: " + createdTask.getId()
+                taskJson
         );
-
         return createdTask;
     }
 
