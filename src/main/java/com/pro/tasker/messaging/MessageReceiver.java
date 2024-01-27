@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessageReceiver {
 
-    @RabbitListener(queues = RabbitMQConfig.QUEUE_NAME)
-    public void receiveMessage(String message) {
-        System.out.println("Message received: " + message);
-    }
+//    @RabbitListener(queues = RabbitMQConfig.QUEUE_NAME)
+//    public void receiveMessage(String message) {
+//        System.out.println("Message received: " + message);
+//    }
 }

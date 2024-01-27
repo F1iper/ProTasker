@@ -11,7 +11,11 @@ public class MessageSender {
     private AmqpTemplate amqpTemplate;
 
     public void sendMessage(String exchange, String routingKey, Object message) {
-        amqpTemplate.convertAndSend(exchange, routingKey, message);
-        System.out.println("Message sent: " + message);
+        if (message instanceof String) {
+            amqpTemplate.convertAndSend(exchange, routingKey, message);
+            System.out.println("Message sent: " + message);
+        } else {
+            throw new IllegalArgumentException("Unsupported message type: " + message.getClass());
+        }
     }
 }

@@ -1,11 +1,10 @@
 package com.pro.tasker.task.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.pro.tasker.messaging.MessageSender;
 import com.pro.tasker.messaging.config.RabbitMQConfig;
 import com.pro.tasker.task.entity.Task;
 import com.pro.tasker.task.service.TaskService;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,25 +25,17 @@ public class TaskController {
     private TaskService taskService;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private MessageSender messageSender;
 
     @PostMapping("/create")
     public Task createTask(@RequestBody Task task) {
         Task createdTask = taskService.createTask(task);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String taskJson;
-        try {
-            taskJson = objectMapper.writeValueAsString(createdTask);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error converting Task to JSON", e);
-        }
+        Gson gson = new Gson();
+        String taskJson = gson.toJson(createdTask);
 
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE_NAME,
-                RabbitMQConfig.ROUTING_KEY,
-                taskJson
-        );
+        messageSender.sendMessage(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, taskJson);
+
         return createdTask;
     }
 
@@ -60,16 +51,7 @@ public class TaskController {
 
     @PatchMapping("/update/{taskId}")
     public Task updateTask(@PathVariable Long taskId, @RequestBody Task updatedTask) {
-        Task updatedTaskResult = taskService.updateTask(taskId, updatedTask);
-
-        // Send message to RabbitMQ when a task is updated
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE_NAME,
-                RabbitMQConfig.ROUTING_KEY,
-                "Task updated: " + updatedTaskResult.getId()
-        );
-
-        return updatedTaskResult;
+        return taskService.updateTask(taskId, updatedTask);
     }
 
     @DeleteMapping("/delete/{taskId}")
