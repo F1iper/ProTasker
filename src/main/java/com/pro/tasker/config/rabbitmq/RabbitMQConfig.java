@@ -1,4 +1,4 @@
-package com.pro.tasker.messaging.config;
+package com.pro.tasker.config.rabbitmq;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;

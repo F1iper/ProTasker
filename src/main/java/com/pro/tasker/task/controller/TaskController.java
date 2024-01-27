@@ -1,9 +1,13 @@
 package com.pro.tasker.task.controller;
 
 import com.pro.tasker.messaging.MessageSender;
-import com.pro.tasker.messaging.config.RabbitMQConfig;
+import com.pro.tasker.config.rabbitmq.RabbitMQConfig;
 import com.pro.tasker.task.entity.Task;
 import com.pro.tasker.task.service.TaskService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "Task controller", description = "Rest controller for tasks.")
 @RestController
 @RequestMapping("/task")
 public class TaskController {
@@ -39,6 +44,13 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
     }
 
+    // TODO: create API interface to simplify controller responses code
+    @Operation(
+            summary = "Fetch all tasks",
+            description = "fetches all task entities and their data from data source")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful operation")
+    })
     @GetMapping("/get")
     public List<Task> getAllTasks() {
         return taskService.getAllTasks();
