@@ -1,37 +1,20 @@
 package com.pro.tasker.task.service;
 
 import com.pro.tasker.task.entity.Task;
-import com.pro.tasker.task.repository.TaskRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
-@Service
-public class TaskService {
+public interface TaskService {
 
-    @Autowired
-    private TaskRepository taskRepository;
+    Task createTask(Task task);
 
-    public Task createTask(Task task) {
-        return taskRepository.save(task);
-    }
+    List<Task> getAllTasks();
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
-    }
+    Task getTaskById(Long taskId);
 
-    public Task getTaskById(Long taskId) {
-        return taskRepository.findById(taskId).orElseGet(null);
-    }
+    Task updateTask(Long taskId, Task updatedTask);
 
-    public Task updateTask(Long taskId, Task updatedTask) {
-        // todo implement correct logic
-        return new Task();
-    }
+    boolean deleteTask(Long taskId);
 
-    public void deleteTask(Long taskId) {
-        taskRepository.deleteById(taskId);
-    }
+    String serializeTaskToJson(Task createdTask);
 }

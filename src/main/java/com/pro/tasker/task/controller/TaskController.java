@@ -1,11 +1,12 @@
 package com.pro.tasker.task.controller;
 
-import com.google.gson.Gson;
 import com.pro.tasker.messaging.MessageSender;
 import com.pro.tasker.messaging.config.RabbitMQConfig;
 import com.pro.tasker.task.entity.Task;
 import com.pro.tasker.task.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,35 +29,39 @@ public class TaskController {
     private MessageSender messageSender;
 
     @PostMapping("/create")
-    public Task createTask(@RequestBody Task task) {
+    public ResponseEntity<Task> createTask(@RequestBody Task task) {
         Task createdTask = taskService.createTask(task);
-
-        Gson gson = new Gson();
-        String taskJson = gson.toJson(createdTask);
-
-        messageSender.sendMessage(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, taskJson);
-
-        return createdTask;
+        String taskJson = taskService.serializeTaskToJson(createdTask);
+        messageSender.sendMessage(
+                RabbitMQConfig.EXCHANGE_NAME,
+                RabbitMQConfig.ROUTING_KEY,
+                taskJson);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
     }
 
-    @GetMapping("/getAll")
+    @GetMapping("/get")
     public List<Task> getAllTasks() {
         return taskService.getAllTasks();
     }
 
     @GetMapping("/get/{taskId}")
-    public Task getTaskById(@PathVariable Long taskId) {
-        return taskService.getTaskById(taskId);
+    public ResponseEntity<Task> getTaskById(@PathVariable Long taskId) {
+        Task task = taskService.getTaskById(taskId);
+        return task != null ? ResponseEntity.ok(task) : ResponseEntity.notFound().build();
     }
 
     @PatchMapping("/update/{taskId}")
-    public Task updateTask(@PathVariable Long taskId, @RequestBody Task updatedTask) {
-        return taskService.updateTask(taskId, updatedTask);
+    public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody Task updatedTask) {
+        Task updated = taskService.updateTask(taskId, updatedTask);
+        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/delete/{taskId}")
-    public String deleteTask(@PathVariable Long taskId) {
-        taskService.deleteTask(taskId);
-        return "Task deleted successfully";
+    public ResponseEntity<String> deleteTask(@PathVariable Long taskId) {
+        if (taskService.deleteTask(taskId)) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
