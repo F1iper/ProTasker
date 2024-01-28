@@ -2,18 +2,21 @@
 
 Welcome to the ProTasker, Java/Spring based application to manage tasks.
 
-The application will allow users to create/update/delete tasks, sort based on category, or time due.
+The application will allow users to create/update/delete tasks, sort based on category, priority or time due.
 
 The application uses Spring Boot as its foundation, providing a robust and easy-to-use framework for building web applications. 
-Spring Security with JWT will used to handle authentication.
+Spring Security with JWT WILL be used to handle authentication.
 
-The application includes CRUD (Create, Read, Update, Delete) functionality for managing tasks/categories and appUser accounts. 
+The application includes CRUD (Create, Read, Update, Delete) functionality for managing tasks/categories/priorities and appUser accounts. 
 Users will be able to add/search tasks. 
 
 ### :wrench: Application is under development.
 
 Currently the application allows these operations:
-- create/read/update/delete tasks without authentication.
+- CRUD for tasks without authentication.
+- CRUD for task categories
+- CRUD for task priorities
+- Possibility to test end-points locally via Swagger-UI
 
 ## :bangbang: Requirements
 * JDK 17 or higher
@@ -35,12 +38,12 @@ Currently the application allows these operations:
 - Test will run mostly using TestContainers (requires docker)
 
 ## :seedling: API documentation
-- not implemented yet
+- Application is not hosted yet, locally API documentation is under: [Swagger-UI](http://localhost:9090/swagger-ui/index.html)
 
 ## :hammer: Tools and Libraries
 - [Java 17](https://www.oracle.com/java/technologies/javase-downloads.html)
 - [Spring Boot](https://spring.io/projects/spring-boot)
-- [MySQL](https://www.mysql.com/)
+- [PostgreSQL](https://www.postgresql.org/)
 - [RabbitMQ](https://rabbitmq.com/)
 - [Hibernate](https://hibernate.org/)
 - [Log4j](https://logging.apache.org/log4j/2.x/)
