@@ -3,27 +3,29 @@ package com.pro.tasker.task.service;
 import com.pro.tasker.task.entity.Task;
 import com.pro.tasker.task.entity.TaskStatus;
 import com.pro.tasker.task.repository.TaskRepository;
-import org.junit.jupiter.api.Assertions;
+import com.pro.tasker.task.service.impl.TaskServiceImpl;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 class TaskServiceTest {
 
     @Mock
     private TaskRepository taskRepository;
 
     @InjectMocks
-    private TaskService taskService;
+    private TaskServiceImpl taskService;
 
     @Test
     public void shouldRetrieveAllTasksFromDB() {
@@ -35,11 +37,43 @@ class TaskServiceTest {
         taskList.add(task2);
 
         //when
+        when(taskRepository.findAll()).thenReturn(taskList);
         List<Task> expectedTasks = taskService.getAllTasks();
 
         //then
-        Assertions.assertAll(
+        assertAll(
                 () -> assertEquals(taskList.size(), expectedTasks.size()),
+                () -> assertEquals(taskList.get(1).getStatus(), expectedTasks.get(1).getStatus()),
                 () -> assertEquals(taskList.get(0).getDescription(), expectedTasks.get(0).getDescription()));
+    }
+
+    @Test
+    public void shouldRetrieveTaskById() {
+        //given
+        long taskId = 1L;
+        Task task = new Task(taskId, "task title", "task description", TaskStatus.IN_PROGRESS);
+
+        //when
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
+        Task retrievedTask = taskService.getTaskById(taskId);
+
+        //then
+        assertEquals(task, retrievedTask);
+    }
+
+    @Test
+    public void shouldSaveTask() {
+        //given
+        Task taskToSave = new Task(null, "new task title", "new task description", TaskStatus.BACKLOG);
+        Task savedTask = new Task(1L, "new task title", "new task description", TaskStatus.BACKLOG);
+
+        //when
+        when(taskRepository.save(taskToSave)).thenReturn(savedTask);
+        Task result = taskService.createTask(taskToSave);
+
+        //then
+        assertAll(
+                () -> assertEquals(savedTask, result),
+                () -> assertEquals(savedTask.getDescription(), result.getDescription()));
     }
 }
