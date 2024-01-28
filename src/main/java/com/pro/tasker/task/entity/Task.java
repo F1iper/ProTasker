@@ -25,6 +25,16 @@ public class Task {
     @Column(nullable = false)
     private TaskStatus status;
 
+    public Task() {
+    }
+
+    public Task(Long id, String title, String description, TaskStatus status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+    }
+
     public Long getId() {
         return id;
     }
