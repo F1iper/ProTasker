@@ -1,8 +1,9 @@
 package com.pro.tasker.task.controller;
 
-import com.pro.tasker.messaging.MessageSender;
 import com.pro.tasker.config.rabbitmq.RabbitMQConfig;
+import com.pro.tasker.messaging.MessageSender;
 import com.pro.tasker.task.entity.Task;
+import com.pro.tasker.task.entity.TaskStatus;
 import com.pro.tasker.task.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -51,7 +53,7 @@ public class TaskController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful operation")
     })
-    @GetMapping("/get")
+    @GetMapping("/all")
     public List<Task> getAllTasks() {
         return taskService.getAllTasks();
     }
@@ -62,18 +64,28 @@ public class TaskController {
         return task != null ? ResponseEntity.ok(task) : ResponseEntity.notFound().build();
     }
 
-    @PatchMapping("/update/{taskId}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody Task updatedTask) {
-        Task updated = taskService.updateTask(taskId, updatedTask);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
-    }
-
     @DeleteMapping("/delete/{taskId}")
     public ResponseEntity<String> deleteTask(@PathVariable Long taskId) {
-        if (taskService.deleteTask(taskId)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return taskService.deleteTask(taskId) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+    @PatchMapping("/{taskId}/status")
+    public ResponseEntity<Task> updateTaskStatus(@PathVariable Long taskId, @RequestParam TaskStatus newStatus) {
+        Task updatedTask = taskService.updateTaskStatus(taskId, newStatus);
+        return (updatedTask != null) ? ResponseEntity.ok(updatedTask) : ResponseEntity.notFound().build();
+    }
+
+    @PatchMapping("/{taskId}/description")
+    public ResponseEntity<Task> updateTaskDescription(@PathVariable Long taskId, @RequestParam String newDescription) {
+        Task updatedTask = taskService.updateTaskDescription(taskId, newDescription);
+        return (updatedTask != null) ? ResponseEntity.ok(updatedTask) : ResponseEntity.notFound().build();
+    }
+
+
+    @PatchMapping("/{taskId}/title")
+    public ResponseEntity<Task> updateTaskTitle(@PathVariable Long taskId, @RequestParam String newTitle) {
+        Task updatedTask = taskService.updateTaskTitle(taskId, newTitle);
+        return (updatedTask != null) ? ResponseEntity.ok(updatedTask) : ResponseEntity.notFound().build();
+    }
+
 }

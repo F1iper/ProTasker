@@ -4,6 +4,7 @@ import com.pro.tasker.task.entity.Task;
 import com.pro.tasker.task.entity.TaskStatus;
 import com.pro.tasker.task.repository.TaskRepository;
 import com.pro.tasker.task.service.impl.TaskServiceImpl;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +17,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,6 +78,94 @@ class TaskServiceTest {
         //then
         assertAll(
                 () -> assertEquals(savedTask, result),
-                () -> assertEquals(savedTask.getDescription(), result.getDescription()));
+                () -> assertEquals(savedTask.getDescription(), result.getDescription()),
+                () -> verify(taskRepository, times(1)).save(any()));
+    }
+
+    @Test
+    public void shouldHandleInvalidTaskIdForUpdateTaskStatus() {
+        //given
+        Long invalidTaskId = 999L;
+        TaskStatus newStatus = TaskStatus.IN_PROGRESS;
+
+        //when
+        when(taskRepository.findById(invalidTaskId)).thenReturn(Optional.empty());
+        Task updatedTask = taskService.updateTaskStatus(invalidTaskId, newStatus);
+
+        //then
+        assertAll(
+                () -> Assertions.assertNull(updatedTask),
+                () -> verify(taskRepository, times(1)).findById(invalidTaskId),
+                () -> verify(taskRepository, times(0)).save(any())
+        );
+    }
+
+    @Test
+    public void shouldUpdateTaskStatus() {
+        //given
+        Long taskId = 1L;
+        Task existingTask = new Task(taskId, "Task Title", "Task Description", TaskStatus.BACKLOG);
+        TaskStatus newStatus = TaskStatus.IN_PROGRESS;
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(existingTask));
+        when(taskRepository.save(existingTask)).thenReturn(existingTask);
+
+        //when
+        Task updatedTask = taskService.updateTaskStatus(taskId, newStatus);
+
+        //then
+        assertAll(
+                () -> Assertions.assertNotNull(updatedTask),
+                () -> assertEquals(newStatus, updatedTask.getStatus()),
+                () -> assertEquals(existingTask.getDescription(), updatedTask.getDescription()),
+                () -> verify(taskRepository, times(1)).findById(taskId),
+                () -> verify(taskRepository, times(1)).save(existingTask)
+        );
+    }
+
+    @Test
+    public void shouldUpdateTaskDescription() {
+        //given
+        Long taskId = 1L;
+        Task existingTask = new Task(taskId, "Task Title", "Task Description", TaskStatus.BACKLOG);
+        String newDescription = "Updated Task Description";
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(existingTask));
+        when(taskRepository.save(existingTask)).thenReturn(existingTask);
+
+        //when
+        Task updatedTask = taskService.updateTaskDescription(taskId, newDescription);
+
+        //then
+        assertAll(
+                () -> Assertions.assertNotNull(updatedTask),
+                () -> assertEquals(newDescription, updatedTask.getDescription()),
+                () -> assertEquals(existingTask.getTitle(), updatedTask.getTitle()),
+                () -> verify(taskRepository, times(1)).findById(taskId),
+                () -> verify(taskRepository, times(1)).save(existingTask)
+        );
+    }
+
+    @Test
+    public void shouldUpdateTaskTitle() {
+        //given
+        Long taskId = 1L;
+        Task existingTask = new Task(taskId, "Task Title", "Task Description", TaskStatus.BACKLOG);
+        String newTitle = "Updated Task Title";
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(existingTask));
+        when(taskRepository.save(existingTask)).thenReturn(existingTask);
+
+        //when
+        Task updatedTask = taskService.updateTaskTitle(taskId, newTitle);
+
+        //then
+        assertAll(
+                () -> Assertions.assertNotNull(updatedTask),
+                () -> assertEquals(newTitle, updatedTask.getTitle()),
+                () -> assertEquals(existingTask.getDescription(), updatedTask.getDescription()),
+                () -> verify(taskRepository, times(1)).findById(taskId),
+                () -> verify(taskRepository, times(1)).save(existingTask)
+        );
     }
 }

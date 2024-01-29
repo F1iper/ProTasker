@@ -2,6 +2,7 @@ package com.pro.tasker.task.service.impl;
 
 import com.google.gson.Gson;
 import com.pro.tasker.task.entity.Task;
+import com.pro.tasker.task.entity.TaskStatus;
 import com.pro.tasker.task.repository.TaskRepository;
 import com.pro.tasker.task.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,41 @@ public class TaskServiceImpl implements TaskService {
         return taskRepository.findById(taskId).orElseGet(null);
     }
 
-    public Task updateTask(Long taskId, Task updatedTask) {
-        // todo implement logic
-        return new Task();
+
+    @Override
+    public Task updateTaskStatus(Long taskId, TaskStatus newStatus) {
+        Task existingTask = taskRepository.findById(taskId).orElse(null);
+
+        if (existingTask != null) {
+            existingTask.setStatus(newStatus);
+            return taskRepository.save(existingTask);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Task updateTaskDescription(Long taskId, String newDescription) {
+        Task existingTask = taskRepository.findById(taskId).orElse(null);
+
+        if (existingTask != null) {
+            existingTask.setDescription(newDescription);
+            return taskRepository.save(existingTask);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Task updateTaskTitle(Long taskId, String newTitle) {
+        Task existingTask = taskRepository.findById(taskId).orElse(null);
+
+        if (existingTask != null) {
+            existingTask.setTitle(newTitle);
+            return taskRepository.save(existingTask);
+        }
+
+        return null;
     }
 
     public boolean deleteTask(Long taskId) {
