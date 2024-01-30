@@ -1,4 +1,4 @@
-package com.pro.tasker.task.service;
+package com.pro.tasker.task.service.unit;
 
 import com.pro.tasker.task.entity.Task;
 import com.pro.tasker.task.entity.TaskStatus;
