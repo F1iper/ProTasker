@@ -1,6 +1,10 @@
 package com.pro.tasker.task.service.impl;
 
 import com.google.gson.Gson;
+import com.pro.tasker.exception.task.TaskCreationException;
+import com.pro.tasker.exception.task.TaskDeletionException;
+import com.pro.tasker.exception.task.TaskNotFoundException;
+import com.pro.tasker.exception.task.TaskSerializationException;
 import com.pro.tasker.task.entity.Task;
 import com.pro.tasker.task.entity.TaskStatus;
 import com.pro.tasker.task.repository.TaskRepository;
@@ -18,7 +22,11 @@ public class TaskServiceImpl implements TaskService {
     private TaskRepository taskRepository;
 
     public Task createTask(Task task) {
-        return taskRepository.save(task);
+        try {
+            return taskRepository.save(task);
+        } catch (Exception e) {
+            throw new TaskCreationException("Error creating task", e);
+        }
     }
 
     public List<Task> getAllTasks() {
@@ -26,7 +34,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     public Task getTaskById(Long taskId) {
-        return taskRepository.findById(taskId).orElseGet(null);
+        return taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Task with ID: [" + taskId + "] not found."));
     }
 
 
@@ -37,9 +45,9 @@ public class TaskServiceImpl implements TaskService {
         if (existingTask != null) {
             existingTask.setStatus(newStatus);
             return taskRepository.save(existingTask);
+        } else {
+            throw new TaskNotFoundException("Task with ID [" + taskId + "] not found.");
         }
-
-        return null;
     }
 
     @Override
@@ -49,9 +57,9 @@ public class TaskServiceImpl implements TaskService {
         if (existingTask != null) {
             existingTask.setDescription(newDescription);
             return taskRepository.save(existingTask);
+        } else {
+            throw new TaskNotFoundException("Task with ID [" + taskId + "] not found.");
         }
-
-        return null;
     }
 
     @Override
@@ -61,23 +69,32 @@ public class TaskServiceImpl implements TaskService {
         if (existingTask != null) {
             existingTask.setTitle(newTitle);
             return taskRepository.save(existingTask);
+        } else {
+            throw new TaskNotFoundException("Task with ID [" + taskId + "] not found.");
         }
-
-        return null;
     }
 
     public boolean deleteTask(Long taskId) {
-        Optional<Task> taskOptional = taskRepository.findById(taskId);
-        if (taskOptional.isPresent()) {
-            taskRepository.deleteById(taskId);
-            return true;
-        } else {
-            return false;
+        try {
+            Optional<Task> taskOptional = taskRepository.findById(taskId);
+            if (taskOptional.isPresent()) {
+                taskRepository.deleteById(taskId);
+                return true;
+            } else {
+                 throw new TaskNotFoundException("Task with ID: [" + taskId + "] not found.");
+            }
+        } catch (Exception e) {
+            throw new TaskDeletionException("Error deleting task with ID: [" + taskId + "]", e);
         }
     }
 
     public String serializeTaskToJson(Task createdTask) {
-        Gson gson = new Gson();
-        return gson.toJson(createdTask);
+        try {
+            Gson gson = new Gson();
+            return gson.toJson(createdTask);
+        } catch (Exception e) {
+            // todo: add logger
+            throw new TaskSerializationException("Error serializing task to JSON", e);
+        }
     }
 }
