@@ -19,7 +19,8 @@ services:
       - "15672:15672"
 
   protasker:
-    build: ./ProTasker
+    build:
+      context: .
     ports:
       - "9090:9090"
     depends_on:
