@@ -18,7 +18,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
 
 
-    private JwtUtil jwtUtil;
+    private JwtU                      til jwtUtil;
     public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
