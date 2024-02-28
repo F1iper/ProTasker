@@ -2,6 +2,7 @@ package com.pro.tasker;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.core.userdetails.User;
@@ -14,6 +15,7 @@ import org.springframework.security.provisioning.UserDetailsManager;
 
 @SpringBootApplication
 @ComponentScan
+@EnableDiscoveryClient
 public class ProTaskerApplication {
 
 	public static void main(String[] args) {
